@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class UserVerification extends Model
 {
     protected $table = 'users_verifications';
+    public $incrementing = false;
+
     /**
      * The attributes that are mass assignable.
      *

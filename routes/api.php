@@ -22,6 +22,8 @@ Route::get('/users', 'UserController@getUsers');
 Route::post('/register', 'UserController@register');
 Route::post('/login', 'UserController@login');
 Route::get('/verify_email/{uid}/{token}', 'UserController@verifyEmail');
+Route::put('/user/update', 'UserController@updateUser');
+Route::delete('/user/delete/{id}', 'UserController@deleteUser');
 
 
 // Structure Routes

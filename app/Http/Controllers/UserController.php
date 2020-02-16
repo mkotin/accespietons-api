@@ -17,7 +17,6 @@ class UserController extends AppController
     public function getUsers(Request $request) {
         try {
             $users = User::with('role')->with('structure')->get();
-            Log::info(json_encode($users));
             return response()->json([
                 'success' => true,
                 'data' => $users
@@ -133,6 +132,71 @@ class UserController extends AppController
         } catch (\Exception $e) {
             Log::error($e);
             return view('404-not-found');
+        }
+    }
+
+    public function updateUser(Request $request) {
+        try {
+            $this->validate($request, [
+                'id' => 'required',
+            ]);
+
+            $user = User::find($request->id);
+            if(!$user) {
+                return response()->json([
+                    'success' => false,
+                    'code' => 1,
+                    'message' => 'User not found'
+                ], 404);
+            }
+            $user->fname = $request->fname;
+            $user->lname = $request->lname;
+            $user->login = $request->login;
+            $user->fonction = $request->fonction;
+            $user->email = $request->email;
+            $user->role_id = $request->role_id;
+            $user->structure_id = $request->structure_id;
+
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User updated!'
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error($e);
+            return response()->json([
+                'success' => false,
+                'code' => 0,
+                'message' => 'Error! Try again!'
+            ], 400);
+        }
+    }
+
+    public function deleteUser($id) {
+        try {
+            $user = User::find($id);
+            if(!$user) {
+                return response()->json([
+                    'success' => false,
+                    'code' => 1,
+                    'message' => 'User not found'
+                ], 404);
+            }
+
+            $user->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User deleted!'
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error($e);
+            return response()->json([
+                'success' => false,
+                'code' => 0,
+                'message' => 'Error! Try again!'
+            ], 400);
         }
     }
 }
