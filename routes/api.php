@@ -18,16 +18,20 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 // User Routes
-Route::get('/users', 'UserController@getUsers');
-Route::post('/register', 'UserController@register');
-Route::post('/login', 'UserController@login');
+Route::middleware('auth')->get('/users', 'UserController@getUsers');
+Route::middleware('auth')->post('/register', 'UserController@register');
+Route::post('/authenticate', 'UserController@authenticate');
 Route::get('/verify_email/{uid}/{token}', 'UserController@verifyEmail');
-Route::put('/user/update', 'UserController@updateUser');
-Route::delete('/user/delete/{id}', 'UserController@deleteUser');
+Route::middleware('auth')->put('/user/update', 'UserController@updateUser');
+Route::middleware('auth')->delete('/user/delete/{id}', 'UserController@deleteUser');
+Route::middleware('auth')->get('/auth-user', 'UserController@getAuth');
+Route::middleware('auth')->get('/is-auth', 'UserController@verifyToken');
 
 
 // Structure Routes
 Route::get('/structures', 'StructureController@index');
+Route::post('/structure', 'StructureController@store');
+Route::put('/structure', 'StructureController@update');
 
 // Role Routes
 Route::get('/roles', 'RoleController@index');

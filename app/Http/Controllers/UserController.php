@@ -104,12 +104,66 @@ class UserController extends AppController
             ]);
 
             $user = User::where('login', $request->input('login'))->whereNotNull('email_verified_at')->first();
+            if(!$user) {
+                return response()->json([
+                    'success' => false,
+                    'code' => 1,
+                    'message' => 'User not found'
+                ], 404);
+            }
             if (Hash::check($request->input('password'), $user->password)) {
                 $apikey = base64_encode(Str::random(40));
                 User::where('login', $request->input('login'))->update(['api_key' => "$apikey"]);;
-                return response()->json(['success' => true, 'api_key' => $apikey]);
+                return response()->json(['success' => true, 'api_key' => $apikey, 'user' => $user]);
             } else {
-                return response()->json(['success' => false, 'code' => 1], 401);
+                return response()->json(['success' => false, 'code' => 2], 401);
+            }
+        } catch (\Exception $e) {
+            Log::error($e);
+            return response()->json([
+                'success' => false,
+                'code' => 0,
+                'message' => 'Error! Try again!'
+            ], 400);
+        }
+    }
+
+    public function verifyToken ($token) {
+        try {
+            if(User::where('api_key', $token)->exists()) {
+                return response()->json([
+                    'success' => true,
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                ], 401);
+            }
+        } catch (\Exception $e) {
+            Log::error($e);
+            return response()->json([
+                'success' => false,
+                'code' => 0,
+                'message' => 'Error! Try again!'
+            ], 400);
+        }
+    }
+
+    public function getAuth(Request $request)
+    {
+        try {
+            $user = parent::getAuthUser($request);
+            if($user) {
+                return response()->json([
+                    'success' => true,
+                    'data' => $user
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'code' => 1,
+                    'message' => 'User not found'
+                ], 404);
             }
         } catch (\Exception $e) {
             Log::error($e);
@@ -158,6 +212,7 @@ class UserController extends AppController
             $user->structure_id = $request->structure_id;
 
             $user->save();
+            $user->api_key = base64_encode(Str::random(40));
 
             return response()->json([
                 'success' => true,

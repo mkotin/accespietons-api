@@ -21,17 +21,12 @@ class Auth extends AppController
             if($this->getAuthUser($request)){
                 return $next($request);
             } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Auth failed! Missing or invalid token'
-                ]);
+                return redirect()->to(env('WEB_APP_URL').'/login')->send();
+
             }
         } catch (\Exception $e) {
             Log::error($e);
-            return response()->json([
-                'success' => false,
-                'message' => 'Error! Try again!'
-            ]);
+            return redirect()->to(env('WEB_APP_URL').'/login')->send();
         }
     }
 }
