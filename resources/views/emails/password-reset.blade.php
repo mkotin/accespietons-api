@@ -143,11 +143,11 @@
                                 <td align="left" style="padding: 0 0 5px 25px; font-size: 13px; font-family: Helvetica, Arial, sans-serif; font-weight: normal; color: #aaaaaa;" class="padding-meta">Port autonome de Cotonou</td>
                             </tr>
                             <tr>
-                                <td align="left" style="padding: 0 0 5px 25px; font-size: 22px; font-family: Helvetica, Arial, sans-serif; font-weight: normal; color: #333333;" class="padding-copy">Verification d'email</td>
+                                <td align="left" style="padding: 0 0 5px 25px; font-size: 22px; font-family: Helvetica, Arial, sans-serif; font-weight: normal; color: #333333;" class="padding-copy">Réinitialisation de mot de passe</td>
                             </tr>
                             <tr>
-                                <td align="left" style="padding: 10px 0 15px 25px; font-size: 16px; line-height: 24px; font-family: Helvetica, Arial, sans-serif; color: #666666;" class="padding-copy">Salut {{$name}}! Vous avez été enregistré sur la plateforme Acces piétons du Port Autonome de Cotonou. Votre token de vérification est : {{$verification_code}}. Votre mot de passe: {{$password}}.
-                                Pour plus de sécurité, pensez à changer ce mot de passe une fois que vous serez connecté.
+                                <td align="left" style="padding: 10px 0 15px 25px; font-size: 16px; line-height: 24px; font-family: Helvetica, Arial, sans-serif; color: #666666;" class="padding-copy">Salut {{$name}}! Votre mot de passe a été réinitialiser. Votre nouveau mot de passe est: {{$password}}.
+                                    Vous pourrez changer ce mot de passe une fois connecté.
                                 </td>
                             </tr>
                             <tr>
@@ -160,9 +160,6 @@
                                                     <tr>
                                                         <td align="center" style="padding: 0;" class="padding-copy">
                                                             <table border="0" cellspacing="0" cellpadding="0" class="responsive-table">
-                                                                <tr>
-                                                                    <td align="center"><a href={{env('APP_URL').'/api'.'/verify_email/'.$uid.'/'.$verification_code}} target="_blank" style="font-size: 15px; font-family: Helvetica, Arial, sans-serif; font-weight: normal; color: #ffffff; text-decoration: none; background-color: #4FC1E9; border-top: 10px solid #4FC1E9; border-bottom: 10px solid #4FC1E9; border-left: 20px solid #4FC1E9; border-right: 20px solid #4FC1E9; border-radius: 3px; -webkit-border-radius: 3px; -moz-border-radius: 3px; display: inline-block;" class="mobile-button">Vérifier email &rarr;</a></td>
-                                                                </tr>
                                                             </table>
                                                         </td>
                                                     </tr>

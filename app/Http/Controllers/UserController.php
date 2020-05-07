@@ -14,7 +14,8 @@ use Illuminate\Support\Str;
 
 class UserController extends AppController
 {
-    public function getUsers(Request $request) {
+    public function getUsers(Request $request)
+    {
         try {
             $users = User::with('role')->with('structure')->get();
             return response()->json([
@@ -37,8 +38,6 @@ class UserController extends AppController
             DB::beginTransaction();
             $this->validate($request, [
                 'email' => 'required|email|max:255|',
-                'password' => 'required',
-                'login' => 'required',
                 'role_id' => 'required',
                 'structure_id' => 'required',
             ]);
@@ -47,15 +46,14 @@ class UserController extends AppController
             $lname = $request->lname;
             $email = $request->email;
             $fonction = $request->fonction;
-            $login = $request->login;
-            $password = $request->password;
+            $password = Str::random(10);;
             $roleId = $request->role_id;
             $structureId = $request->structure_id;
             $date = Carbon::now();
             $uid = $this->idGenerator('USER');
 
 
-            if(User::where('email',$email)->exists()){
+            if (User::where('email', $email)->exists()) {
                 return response()->json([
                     'success' => false,
                     'code' => 1,
@@ -63,29 +61,54 @@ class UserController extends AppController
                 ], 400);
             }
 
-            if(User::where('login',$login)->exists()){
-                return response()->json([
-                    'success' => false,
-                    'code' => 2,
-                    'message' => 'Login already exists!'
-                ], 400);
-            }
 
             $user = User::create(['id' => $uid, 'fname' => $fname, 'lname' => $lname, 'email' => $email,
-                'fonction' => $fonction, 'login' => $login, 'password' => Hash::make($password), 'role_id' => $roleId, 'structure_id' => $structureId, 'register_date' => $date]);
+                'fonction' => $fonction, 'password' => Hash::make($password), 'role_id' => $roleId, 'structure_id' => $structureId, 'register_date' => $date]);
             $verification_code = Str::random(30); //Generate verification code
-        DB::table('users_verifications')->insert(['id' => $this->idGenerator('UVERIFIRCATION') ,'user_id' => $uid, 'verification_code' => $verification_code]);
-        $subject = "Verification de votre email";
-        Mail::send('emails.verify', ['name' => $lname.' '.$fname, 'verification_code' => $verification_code, 'uid' => $uid],
-            function ($mail) use ($email, $lname, $fname, $subject) {
-                $mail->from(getenv('MAIL_FROM_ADDRESS'), "Port Autonome de Cotonou");
-                $mail->to($email, $lname.' '.$fname);
-                $mail->subject($subject);
-            });
-        DB::commit();
+            DB::table('users_verifications')->insert(['id' => $this->idGenerator('VERIFICATION'), 'user_id' => $uid, 'verification_code' => $verification_code]);
+            $subject = "Verification de votre email";
+            Mail::send('emails.verify', ['name' => $lname . ' ' . $fname, 'verification_code' => $verification_code, 'uid' => $uid, 'password' => $password],
+                function ($mail) use ($email, $lname, $fname, $subject) {
+                    $mail->from(getenv('MAIL_FROM_ADDRESS'), "Port Autonome de Cotonou");
+                    $mail->to($email, $lname . ' ' . $fname);
+                    $mail->subject($subject);
+                });
+            DB::commit();
             return response()->json(['success' => true, 'message' => 'Thanks for signing up!'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'success' => false,
+                'code' => 0,
+                'message' => 'Error! Try again!'
+            ], 400);
+        }
+    }
+
+    public function resetPassword($id)
+    {
+        try {
+
+            if ($user = User::find($id)) {
+                $password = Str::random(10);
+                $user->password = Hash::make($password);
+                $user->save();
+                $subject = "Réinitialisation de mot de passe";
+                Mail::send('emails.password-reset', ['name' => $user->lname . ' ' . $user->fname, 'password' => $password],
+                    function ($mail) use ($user, $subject) {
+                    $mail->from(getenv('MAIL_FROM_ADDRESS'), "Port Autonome de Cotonou");
+                    $mail->to($user->email, $user->lname . ' ' . $user->fname);
+                    $mail->subject($subject);
+                });
+                return response()->json(['success' => true], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'code' => 1,
+                ], 404);
+            }
+        } catch (\Exception $e) {
             Log::error($e);
             return response()->json([
                 'success' => false,
@@ -99,12 +122,12 @@ class UserController extends AppController
     {
         try {
             $this->validate($request, [
-                'login' => 'required',
+                'email' => 'required',
                 'password' => 'required'
             ]);
 
-            $user = User::where('login', $request->input('login'))->whereNotNull('email_verified_at')->first();
-            if(!$user) {
+            $user = User::where('email', $request->input('email'))->whereNotNull('email_verified_at')->first();
+            if (!$user) {
                 return response()->json([
                     'success' => false,
                     'code' => 1,
@@ -113,7 +136,7 @@ class UserController extends AppController
             }
             if (Hash::check($request->input('password'), $user->password)) {
                 $apikey = base64_encode(Str::random(40));
-                User::where('login', $request->input('login'))->update(['api_key' => "$apikey"]);;
+                User::where('email', $request->input('email'))->update(['api_key' => "$apikey"]);;
                 return response()->json(['success' => true, 'api_key' => $apikey, 'user' => $user]);
             } else {
                 return response()->json(['success' => false, 'code' => 2], 401);
@@ -128,9 +151,10 @@ class UserController extends AppController
         }
     }
 
-    public function verifyToken ($token) {
+    public function verifyToken($token)
+    {
         try {
-            if(User::where('api_key', $token)->exists()) {
+            if (User::where('api_key', $token)->exists()) {
                 return response()->json([
                     'success' => true,
                 ], 200);
@@ -153,7 +177,7 @@ class UserController extends AppController
     {
         try {
             $user = parent::getAuthUser($request);
-            if($user) {
+            if ($user) {
                 return response()->json([
                     'success' => true,
                     'data' => $user
@@ -175,11 +199,12 @@ class UserController extends AppController
         }
     }
 
-    public function verifyEmail($uid, $token) {
+    public function verifyEmail($uid, $token)
+    {
         try {
-            if(UserVerification::where('user_id', $uid)->where('verification_code', $token)->exists() && User::where('id', $uid)->whereNull('email_verified_at')->exists()) {
-                User::where('id',$uid)->update(['email_verified_at' => Carbon::now()]);
-                return redirect()->to(env('WEB_APP_URL').'/login')->send();
+            if (UserVerification::where('user_id', $uid)->where('verification_code', $token)->exists() && User::where('id', $uid)->whereNull('email_verified_at')->exists()) {
+                User::where('id', $uid)->update(['email_verified_at' => Carbon::now()]);
+                return redirect()->to(env('WEB_APP_URL') . '/login')->send();
             } else {
                 return view('404-not-found');
             }
@@ -189,14 +214,15 @@ class UserController extends AppController
         }
     }
 
-    public function updateUser(Request $request) {
+    public function updateUser(Request $request)
+    {
         try {
             $this->validate($request, [
                 'id' => 'required',
             ]);
 
             $user = User::find($request->id);
-            if(!$user) {
+            if (!$user) {
                 return response()->json([
                     'success' => false,
                     'code' => 1,
@@ -205,11 +231,22 @@ class UserController extends AppController
             }
             $user->fname = $request->fname;
             $user->lname = $request->lname;
-            $user->login = $request->login;
             $user->fonction = $request->fonction;
+            $user->password = Hash::make($request->password);
+
+            if ($user->email !== $request->email && User::where('email', $user->email)->exists()) {
+                return response()->json([
+                    'success' => false,
+                    'code' => 2,
+                    'message' => 'Email already exists!'
+                ], 400);
+            }
             $user->email = $request->email;
+
             $user->role_id = $request->role_id;
             $user->structure_id = $request->structure_id;
+
+
 
             $user->save();
             $user->api_key = base64_encode(Str::random(40));
@@ -228,10 +265,11 @@ class UserController extends AppController
         }
     }
 
-    public function deleteUser($id) {
+    public function deleteUser($id)
+    {
         try {
             $user = User::find($id);
-            if(!$user) {
+            if (!$user) {
                 return response()->json([
                     'success' => false,
                     'code' => 1,

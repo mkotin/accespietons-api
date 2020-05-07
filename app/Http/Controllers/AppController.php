@@ -22,7 +22,7 @@ class AppController extends Controller
         if(!$apiKey) {
             return null;
         }
-        $user = User::where('api_key', $apiKey)->whereNotNull('api_key')->with('role')->first();
+        $user = User::where('api_key', $apiKey)->whereNotNull('api_key')->with('role')->with('structure')->first();
         if($user){
             return $user;
         } else {

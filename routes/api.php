@@ -20,6 +20,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 // User Routes
 Route::middleware('auth')->get('/users', 'UserController@getUsers');
 Route::middleware('auth')->post('/register', 'UserController@register');
+Route::middleware('auth')->get('/reset-password/{id}', 'UserController@resetPassword');
 Route::post('/authenticate', 'UserController@authenticate');
 Route::get('/verify_email/{uid}/{token}', 'UserController@verifyEmail');
 Route::middleware('auth')->put('/user/update', 'UserController@updateUser');
@@ -32,6 +33,7 @@ Route::middleware('auth')->get('/is-auth', 'UserController@verifyToken');
 Route::get('/structures', 'StructureController@index');
 Route::post('/structure', 'StructureController@store');
 Route::put('/structure', 'StructureController@update');
+Route::delete('/structure/{id}', 'StructureController@delete');
 
 // Role Routes
 Route::get('/roles', 'RoleController@index');

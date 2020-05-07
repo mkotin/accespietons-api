@@ -15,19 +15,21 @@ class CreateUsagerTable extends Migration
     {
         Schema::create('usagers', function (Blueprint $table) {
             $table->string('id')->primary();
-            $table->string('nom',30)->nullable();
-            $table->string('prenoms',30)->nullable();
+            $table->string('nom',200)->nullable();
+            $table->string('prenoms',200)->nullable();
             $table->date('date_naiss')->nullable();
             $table->string('lieu_naiss',30)->nullable();
-            $table->string('nationalite',40);
+            $table->string('nationalite',200);
             $table->text('photo')->nullable();
             $table->text('adresse')->nullable();
-            $table->string('telephone',30)->nullable();
-            $table->string('email',30)->nullable()->unique();
-            $table->string('fonction',100)->nullable();
-            $table->string('num_piece_identite',50)->unique();
-            $table->string('num_carte_professionelle',50)->nullable();
-            $table->string('num_certificat_prise_service',50)->nullable();
+            $table->string('telephone',200)->nullable();
+            $table->string('email',200)->nullable()->unique();
+            $table->string('fonction',255)->nullable();
+            $table->string('num_piece_identite',200)->unique();
+            $table->string('num_carte_professionelle',200)->nullable();
+            $table->string('num_certificat_prise_service',200)->nullable();
+            $table->string('temps_acces',100)->nullable();
+            $table->string('type_acces',50)->nullable();
             $table->boolean('actif')->default(false);
             $table->datetime('date_ajout')->nullable();
             $table->string('statut',10)->nullable();

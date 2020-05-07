@@ -98,4 +98,29 @@ class StructureController extends AppController
             ], 400);
         }
     }
+
+    public function delete($id) {
+        try {
+            $structure = Structure::find($id);
+            if(!$structure) {
+                return response()->json([
+                    'success' => false,
+                    'code' => 1,
+                    'message' => 'Not found!'
+                ], 404);
+            }
+
+            $structure->delete();
+            return response()->json([
+                'success' => true,
+            ], 200);
+        } catch (\Exception $e){
+            Log::error($e);
+            return response()->json([
+                'success' => false,
+                'code' => 0,
+                'message' => 'Error! Try again!'
+            ], 400);
+        }
+    }
 }
