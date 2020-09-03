@@ -2,26 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Role;
+use App\Models\Zone;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
-class RoleController extends Controller
+class ZoneController extends AppController
 {
-    public function index() {
+    public function index(Request $request) {
         try {
-            $roles = Role::all();
+            $zones = Zone::all();
             return response()->json([
                 'success' => true,
-                'data' => $roles
-            ], 200);
-        } catch (\Exception $e){
+                'data' => $zones
+            ]);
+        } catch (\Exception $e) {
+            \DB::rollback();
             Log::error($e);
             return response()->json([
                 'success' => false,
-                'code' => 0,
                 'message' => 'Error! Try again!'
-            ], 400);
+            ], 500);
         }
     }
 }

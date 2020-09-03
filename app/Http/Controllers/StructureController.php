@@ -24,7 +24,7 @@ class StructureController extends AppController
         } catch (\Exception $e){
             Log::error($e);
             return response()->json([
-                'success' => true,
+                'success' => false,
                 'code' => 0,
                 'message' => 'Error! Try again!'
             ], 400);

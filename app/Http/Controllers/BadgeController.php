@@ -2,26 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Role;
+use App\Models\BadgeType;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
-class RoleController extends Controller
+class BadgeController extends AppController
 {
-    public function index() {
+    public function getBadgeTypes(Request $request) {
         try {
-            $roles = Role::all();
+            $types = BadgeType::all();
             return response()->json([
                 'success' => true,
-                'data' => $roles
-            ], 200);
-        } catch (\Exception $e){
+                'data' => $types
+            ]);
+        } catch (\Exception $e) {
+            \DB::rollback();
             Log::error($e);
             return response()->json([
                 'success' => false,
-                'code' => 0,
                 'message' => 'Error! Try again!'
-            ], 400);
+            ], 500);
         }
     }
 }

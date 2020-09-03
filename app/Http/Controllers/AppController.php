@@ -29,4 +29,18 @@ class AppController extends Controller
             return null;
         }
     }
+
+    public function updateModel($array,$model, $exclude = []) {
+        $modelAttributes = $model->attributesToArray();
+        foreach ($array as $key => $value) {
+            if(!in_array($key, $exclude)){
+                if(array_key_exists($key, $modelAttributes)) {
+                    $model->$key = $value;
+                    //array_push($test, $key);
+                }
+            }
+        }
+        return $model;
+        //return $test;
+    }
 }

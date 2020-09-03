@@ -43,4 +43,8 @@ class User extends Model
     public function structure() {
         return $this->belongsTo('App\Models\Structure', 'structure_id', 'id');
     }
+
+    public function demandes() {
+        return $this->hasMany('App\Models\Demande', 'agent_id', 'id');
+    }
 }

@@ -35,6 +35,22 @@ Route::post('/structure', 'StructureController@store');
 Route::put('/structure', 'StructureController@update');
 Route::delete('/structure/{id}', 'StructureController@delete');
 
+//Usagers Routes
+Route::get('/structuresUsagers/{structureId}', 'UsagerController@getUsagersByStructure');
+
+//Demandes
+Route::post('/storeDemande', 'DemandeController@storeDemande');
+Route::post('/listDemandes', 'DemandeController@getDemandes');
+
+// Badge
+Route::get('/badge-types', 'BadgeController@getBadgeTypes');
+
+//Zone
+Route::get('/zones', 'ZoneController@index');
+
+
+
+
 // Role Routes
 Route::get('/roles', 'RoleController@index');
 
