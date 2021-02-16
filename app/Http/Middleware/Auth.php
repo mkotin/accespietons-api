@@ -22,7 +22,6 @@ class Auth extends AppController
                 return $next($request);
             } else {
                 return redirect()->to(env('WEB_APP_URL').'/login')->send();
-
             }
         } catch (\Exception $e) {
             Log::error($e);

@@ -19,7 +19,7 @@ class Demande extends Model
     ];
 
     public function usagers() {
-        return $this->belongsToMany('App\Models\Usager', 'sous_demandes_usagers', 'usager_id', 'demande_id');
+        return $this->belongsToMany('App\Models\Usager', 'sous_demandes_usagers', 'demande_id', 'usager_id');
     }
 
     public function structure() {

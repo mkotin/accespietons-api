@@ -146,8 +146,17 @@
                                 <td align="left" style="padding: 0 0 5px 25px; font-size: 22px; font-family: Helvetica, Arial, sans-serif; font-weight: normal; color: #333333;" class="padding-copy">Verification d'email</td>
                             </tr>
                             <tr>
-                                <td align="left" style="padding: 10px 0 15px 25px; font-size: 16px; line-height: 24px; font-family: Helvetica, Arial, sans-serif; color: #666666;" class="padding-copy">Salut {{$name}}! Vous avez été enregistré sur la plateforme Acces piétons du Port Autonome de Cotonou. Votre jeton de vérification est : {{$verification_code}}. Votre mot de passe: {{$password}}.
-                                Pour plus de sécurité, pensez à changer ce mot de passe une fois que vous serez connecté.
+                                <td align="left" style="padding: 10px 0 15px 25px; font-size: 16px; line-height: 24px; font-family: Helvetica, Arial, sans-serif; color: #666666;" class="padding-copy">Cher {{$user['name']}},<br/>
+                                 Vous avez été invité à une séance COS planifiée.<br/>
+                                     ID de la séance: {{$cos['numero_seance']}}</td></br>
+                                     Sujet: {{$cos['objet']}}</td></br>
+                                     Date & Heure: {{$cos['date']}} - {{$cos['heure']}}</td></br>
+                                 Lieu: {{$cos['lieu']}}</td></br>
+                                 @if($user['role']['name'] == "Structure")
+                                 Référence de(s) demande(s) à traitée(s):
+                                 {{$demandes}}</td></br>
+                                 @endif
+
                                 </td>
                             </tr>
                             <tr>

@@ -41,6 +41,8 @@ Route::get('/structuresUsagers/{structureId}', 'UsagerController@getUsagersByStr
 //Demandes
 Route::post('/storeDemande', 'DemandeController@storeDemande');
 Route::post('/listDemandes', 'DemandeController@getDemandes');
+Route::get('/demande/{id}', 'DemandeController@getDemande');
+Route::get('/affecterDemande/{id}', 'DemandeController@affecterDemande');
 
 // Badge
 Route::get('/badge-types', 'BadgeController@getBadgeTypes');
@@ -49,9 +51,13 @@ Route::get('/badge-types', 'BadgeController@getBadgeTypes');
 Route::get('/zones', 'ZoneController@index');
 
 
-
-
 // Role Routes
 Route::get('/roles', 'RoleController@index');
+
+// Cos Routes
+Route::post('/cos/store', 'CosController@store');
+Route::get('/cos/all', 'CosController@all');
+Route::post('/cos/addDemande', 'CosController@addDemandeToCos');
+
 
 

@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Cors extends Model
+class Cos extends Model
 {
-    protected $table = 'seance_cosss';
+    protected $table = 'seance_coss';
     public $incrementing = false;
 
     /**
@@ -15,6 +15,6 @@ class Cors extends Model
      * @var array
      */
     protected $fillable = [
-        'id', 'numero_seance', 'date_debut', 'date_fin', 'statut', 'created_at', 'updated_at'
+        'id', 'numero_seance', 'date', 'heure', 'lieu', 'statut', 'created_at', 'updated_at'
     ];
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use App\Models\User;
 use App\Models\UserVerification;
 use Carbon\Carbon;
@@ -61,12 +62,19 @@ class UserController extends AppController
                 ], 400);
             }
 
+            if (User::where('structure_id', $structureId)->where('structure_id', '<>', '0')->exists()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Un compte existe déja, pour cette structure!'
+                ], 400);
+            }
+
 
             $user = User::create(['id' => $uid, 'fname' => $fname, 'lname' => $lname, 'email' => $email,
                 'fonction' => $fonction, 'password' => Hash::make($password), 'role_id' => $roleId, 'structure_id' => $structureId, 'register_date' => $date]);
             $verification_code = Str::random(30); //Generate verification code
             DB::table('users_verifications')->insert(['id' => $this->idGenerator('VERIFICATION'), 'user_id' => $uid, 'verification_code' => $verification_code]);
-            $subject = "Verification de votre email";
+            $subject = "Vérification de votre email";
             Mail::send('emails.verify', ['name' => $lname . ' ' . $fname, 'verification_code' => $verification_code, 'uid' => $uid, 'password' => $password],
                 function ($mail) use ($email, $lname, $fname, $subject) {
                     $mail->from(getenv('MAIL_FROM_ADDRESS'), "Port Autonome de Cotonou");
@@ -234,7 +242,7 @@ class UserController extends AppController
             $user->fonction = $request->fonction;
             $user->password = Hash::make($request->password);
 
-            if ($user->email !== $request->email && User::where('email', $user->email)->exists()) {
+            if ($user->email !== $request->email && User::where('email', $request->email)->exists()) {
                 return response()->json([
                     'success' => false,
                     'code' => 2,
