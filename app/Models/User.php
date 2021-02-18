@@ -36,15 +36,28 @@ class User extends Model
         'email_verified_at' => 'datetime',
     ];
 
-    public function role() {
+    public function role()
+    {
         return $this->belongsTo('App\Models\Role', 'role_id', 'id');
     }
 
-    public function structure() {
+    public function structure()
+    {
         return $this->belongsTo('App\Models\Structure', 'structure_id', 'id');
     }
 
-    public function demandes() {
+    public function demandes()
+    {
         return $this->hasMany('App\Models\Demande', 'agent_id', 'id');
+    }
+
+    /**
+     * A user can have many messages
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function messages()
+    {
+        return $this->hasMany('App\Models\Message', 'user_id', 'id');
     }
 }

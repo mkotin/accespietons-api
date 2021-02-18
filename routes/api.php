@@ -44,6 +44,10 @@ Route::post('/listDemandes', 'DemandeController@getDemandes');
 Route::get('/demande/{id}', 'DemandeController@getDemande');
 Route::get('/affecterDemande/{id}', 'DemandeController@affecterDemande');
 
+// Demande Forum routes
+Route::get('demandeMessages/{demandeId?}', 'DemandeForumController@fetchMessages');
+Route::post('demandeMessages', 'DemandeForumController@sendMessage');
+
 // Badge
 Route::get('/badge-types', 'BadgeController@getBadgeTypes');
 
