@@ -43,10 +43,13 @@ Route::post('/storeDemande', 'DemandeController@storeDemande');
 Route::post('/listDemandes', 'DemandeController@getDemandes');
 Route::get('/demande/{id}', 'DemandeController@getDemande');
 Route::get('/affecterDemande/{id}', 'DemandeController@affecterDemande');
-
-// Demande Forum routes
+Route::get('/verifierDemande/{id}', 'DemandeController@verifierDemande');
 Route::get('demandeMessages/{demandeId?}', 'DemandeForumController@fetchMessages');
 Route::post('demandeMessages', 'DemandeForumController@sendMessage');
+Route::get('journalDemande/{demandeId?}', 'JournalisationDemandeController@list');
+Route::post('verdictDemande', 'DemandeController@verdictDemande');
+Route::post('submitStructureDemandeReport', 'DemandeController@submitStructureDemandeReport');
+
 
 // Badge
 Route::get('/badge-types', 'BadgeController@getBadgeTypes');

@@ -11,7 +11,12 @@ use Illuminate\Support\Facades\Log;
 
 class CosController extends AppController
 {
-    public function store(Request $request)
+    protected $journalisationDemandeController;
+    public function __construct()
+    {
+        $this->journalisationDemandeController = new JournalisationDemandeController();
+    }
+        public function store(Request $request)
     {
     	try{
     		$inputs = $request->all();
@@ -58,6 +63,7 @@ class CosController extends AppController
     		$demande->save();
     		$id = $this->idGenerator('COS');
     		Inviter::create($inputs + ["participe_structure" => true, "id" => $id]);
+                $this->journalisationDemandeController->store($inputs['demande_id'], '', 'a ajouté la demande au COS '.$inputs['seance_cos_id'], $request );
     		DB::commit();
     		return response()->json([
                     'success' => true,

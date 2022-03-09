@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Demande;
 use App\Models\Role;
+use App\Models\SousDemandeUsager;
 use App\Models\Structure;
 use App\Models\User;
 use App\models\Usager;
@@ -15,9 +16,11 @@ use Illuminate\Support\Facades\Log;
 class DemandeController extends AppController
 {
     protected $fakeApiController;
+    protected $journalisationDemandeController;
     public function __construct()
     {
         $this->fakeApiController = new FakeApiController();
+        $this->journalisationDemandeController = new JournalisationDemandeController();
     }
 
     public function storeDemande(Request $request)
@@ -138,17 +141,19 @@ class DemandeController extends AppController
             $inputs = $request->all();
             switch ($userRole) {
                 case 'ADMIN':
-                    $demandes = Demande::where($inputs)->with('structure', 'cos')->get();
+                    $demandes = Demande::where($inputs)->with('structure', 'cos')->orderBy("created_at", "asc")->get();
                     break;
                 case 'SECRETARIAT DIR. GEN.':
-                    $demandes = Demande::where($inputs)->where('niveau_acces', '<=', 3)->with('structure', 'cos')->get();
+                    $demandes = Demande::where($inputs)->where('niveau_acces', '<=', 3)->with('structure', 'cos')->orderBy("created_at", "asc")->get();
                     break;
                 case 'COMMANDANT':
-                    Log::info('inside commandant');
-                    $demandes = Demande::where($inputs)->where('niveau_acces', '<=', 2)->with('structure', 'cos')->get();
+                    $demandes = Demande::where($inputs)->where('niveau_acces', '<=', 2)->with('structure', 'cos')->orderBy("created_at", "asc")->get();
                     break;
+                case 'STRUCTURE':
+                        $demandes = Demande::where($inputs)->with('structure', 'cos')->orderBy("created_at", "asc")->get();
+                        break;
                 default:
-                    $demandes = Demande::where($inputs)->where('niveau_acces', '<=', 1)->with('structure', 'cos')->get();
+                    $demandes = Demande::where($inputs)->where('niveau_acces', '<=', 1)->with('structure', 'cos')->orderBy("created_at", "asc")->get();
                     break;
             }
             return response()->json([
@@ -197,11 +202,16 @@ class DemandeController extends AppController
         }
     }
 
-    public function affecterDemande($demandeId) {
+    public function affecterDemande(Request $request, $demandeId) {
         try {
             $demande = Demande::where('id', $demandeId)->first();
             $demande->niveau_acces = $demande->niveau_acces - 1;
             $demande->save();
+            if($demande->niveau_acces == 2) {
+                $this->journalisationDemandeController->store($demandeId, '', 'a affecté la demande au COMMANDANT', $request );
+            } else {
+                $this->journalisationDemandeController->store($demandeId, '', 'a affecté la demande au SSFA', $request );
+            }
             return response()->json([
                 'success' => true
             ], 200);
@@ -211,6 +221,92 @@ class DemandeController extends AppController
                 'success' => false,
                 'message' => 'Error! Try again!'
             ], 500);
+        }
+    }
+
+    public function verifierDemande(Request $request, $demandeId) {
+        try {
+            $demande = Demande::where('id', $demandeId)->first();
+            $demande->verifiee = !$demande->verifiee;
+            $demande->save();
+            if($demande->verifiee == 1) {
+                $this->journalisationDemandeController->store($demandeId, '', 'a vérifié la demande', $request );
+                return response()->json([
+                    'success' => true,
+                    'message' => "Demande vérifiée"
+                ], 200);
+            } else {
+                $this->journalisationDemandeController->store($demandeId, '', 'a marqué la demande, non vérifié', $request );
+                return response()->json([
+                    'success' => true,
+                    'message' => "Demande non vérifiée"
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            Log::error($e);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error! Try again!'
+            ]);
+        }
+    }
+
+    public function verdictDemande(Request $request) {
+        try {
+            $demandeId = $request->demandeId;
+            $nbre = $request->nbre;
+            $demande = Demande::find($demandeId);
+            $demande->nbre_usagers_accepte = $nbre;
+            if($nbre > 0) {
+                $demande->statut = "EN_ATTENTE_DU_RAPPORT_STRUCTURE";
+            } else {
+                $demande->statut = "REJETEE";
+            }
+            $demande->save();
+            if($demande->reglement_demande_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cette demande a déjà été payée.'
+                ]);
+            } else {
+                $this->journalisationDemandeController->store($demandeId, '', 'a prononcé un verdict', $request );
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Succès'
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error($e);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error! Try again!'
+            ]);
+        }
+    }
+
+    public function submitStructureDemandeReport(Request $request) {
+        try {
+            DB::beginTransaction();
+            $demandeId = $request->demandeId;
+            $usagers = $request->usagers;
+            $demande = Demande::find($demandeId);
+            SousDemandeUsager::where('demande_id', $demandeId)->whereIn("usager_id", $usagers)->update(["autorise" => 1]);
+            $montantAcceptee = SousDemandeUsager::where('demande_id', $demandeId)->whereIn("usager_id", $usagers)->sum('couttc');
+            $demande->montant_accepte = $montantAcceptee;
+            $demande->statut = "VALIDEE";
+            $demande->save();
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Succès'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error! Try again!'
+            ]);
         }
     }
 }

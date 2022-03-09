@@ -128,6 +128,7 @@ class UserController extends AppController
 
     public function authenticate(Request $request)
     {
+        Log::info("hello");
         try {
             $this->validate($request, [
                 'email' => 'required',

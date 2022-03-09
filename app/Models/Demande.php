@@ -15,11 +15,11 @@ class Demande extends Model
      * @var array
      */
     protected $fillable = [
-        'id', 'ref', 'date_retrait','date_soumission','statut','niveau_acces','montant','responsable','objet_demande','montant_accepte','structure_id','reglement_demande_id','seance_cos_id', 'agent_id', 'created_at','updated_at'
+        'id', 'ref', 'date_retrait','date_soumission','statut','niveau_acces','montant','responsable','objet_demande', 'nbre_usagers_accepte', 'montant_accepte', 'verifiee', 'structure_id','reglement_demande_id','seance_cos_id', 'agent_id', 'created_at','updated_at'
     ];
 
     public function usagers() {
-        return $this->belongsToMany('App\Models\Usager', 'sous_demandes_usagers', 'demande_id', 'usager_id');
+        return $this->belongsToMany('App\Models\Usager', 'sous_demandes_usagers', 'demande_id', 'usager_id')->withPivot('autorise', 'type_acces', 'temps_acces');
     }
 
     public function structure() {
